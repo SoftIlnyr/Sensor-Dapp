@@ -9,6 +9,7 @@ let getContract = new Promise(function (resolve, reject) {
   let web3 = new Web3(window.web3.currentProvider)
   let sensorContract = web3.eth.contract(ABI)
   let sensorContractInstance = sensorContract.at(address)
+  console.log(web3.version.api)
   console.log(sensorContract)
   console.log(sensorContractInstance)
   resolve(sensorContractInstance)

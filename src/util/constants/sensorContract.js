@@ -1,78 +1,57 @@
-const address = '0x262556c2bfe0059c7370339905cb495ced97f28f'
+const address = '0x3d0a8cd00b56d92717a9e755f3e536f9d6d70cac'
 const ABI = [
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "previousOwner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_name",
-				"type": "string"
-			}
-		],
-		"name": "addOrganization",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
+		"constant": true,
 		"inputs": [
 			{
 				"name": "_orgId",
 				"type": "uint256"
-			},
-			{
-				"name": "_sensorName",
-				"type": "string"
-			},
-			{
-				"name": "_sensorType",
-				"type": "string"
-			},
-			{
-				"name": "_sensorPeriod",
-				"type": "string"
 			}
 		],
-		"name": "addSensor",
-		"outputs": [],
+		"name": "getSensorsByOrganization",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
 		"payable": false,
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"constant": false,
+		"constant": true,
 		"inputs": [
 			{
-				"name": "_sensorId",
-				"type": "uint256"
-			},
-			{
-				"name": "_value",
+				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "addSensorData",
-		"outputs": [],
+		"name": "sensors",
+		"outputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "sensorType",
+				"type": "string"
+			},
+			{
+				"name": "period",
+				"type": "uint8"
+			},
+			{
+				"name": "sensorDataCount",
+				"type": "uint128"
+			}
+		],
 		"payable": false,
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -123,23 +102,15 @@ const ABI = [
 		"constant": false,
 		"inputs": [
 			{
-				"name": "_uAddress",
-				"type": "address"
+				"name": "_sensorId",
+				"type": "uint256"
 			},
 			{
-				"name": "_firstName",
-				"type": "string"
-			},
-			{
-				"name": "_lastName",
-				"type": "string"
-			},
-			{
-				"name": "_role",
-				"type": "string"
+				"name": "_value",
+				"type": "uint256"
 			}
 		],
-		"name": "createUser",
+		"name": "addSensorData",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -163,65 +134,14 @@ const ABI = [
 		"constant": false,
 		"inputs": [
 			{
-				"name": "_lastName",
+				"name": "_name",
 				"type": "string"
 			}
 		],
-		"name": "setLastName",
+		"name": "addOrganization",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_uAddress",
-				"type": "address"
-			},
-			{
-				"name": "_role",
-				"type": "string"
-			}
-		],
-		"name": "setRole",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "_orgId",
-				"type": "uint256"
-			}
-		],
-		"name": "getSensorDataByOrganization",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -237,106 +157,6 @@ const ABI = [
 			{
 				"name": "",
 				"type": "uint256[]"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "_orgId",
-				"type": "uint256"
-			}
-		],
-		"name": "getSensorsByOrganization",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "organizationBySensorId",
-		"outputs": [
-			{
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"name": "sensorCount",
-				"type": "uint32"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "organizationByUserAddress",
-		"outputs": [
-			{
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"name": "sensorCount",
-				"type": "uint32"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "organizations",
-		"outputs": [
-			{
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"name": "sensorCount",
-				"type": "uint32"
 			}
 		],
 		"payable": false,
@@ -393,65 +213,17 @@ const ABI = [
 		"type": "function"
 	},
 	{
-		"constant": true,
+		"constant": false,
 		"inputs": [
 			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "sensorData",
-		"outputs": [
-			{
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"name": "value",
-				"type": "uint256"
-			},
-			{
-				"name": "timestamp",
-				"type": "uint32"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "sensors",
-		"outputs": [
-			{
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"name": "name",
+				"name": "_lastName",
 				"type": "string"
-			},
-			{
-				"name": "sensorType",
-				"type": "string"
-			},
-			{
-				"name": "period",
-				"type": "uint8"
-			},
-			{
-				"name": "sensorDataCount",
-				"type": "uint128"
 			}
 		],
+		"name": "setLastName",
+		"outputs": [],
 		"payable": false,
-		"stateMutability": "view",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -484,6 +256,234 @@ const ABI = [
 		"payable": false,
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "sensorData",
+		"outputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"name": "value",
+				"type": "uint256"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "organizationByUserAddress",
+		"outputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "sensorCount",
+				"type": "uint32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_orgId",
+				"type": "uint256"
+			}
+		],
+		"name": "getSensorDataByOrganization",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_uAddress",
+				"type": "address"
+			},
+			{
+				"name": "_firstName",
+				"type": "string"
+			},
+			{
+				"name": "_lastName",
+				"type": "string"
+			},
+			{
+				"name": "_role",
+				"type": "string"
+			}
+		],
+		"name": "createUser",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_orgId",
+				"type": "uint256"
+			},
+			{
+				"name": "_sensorName",
+				"type": "string"
+			},
+			{
+				"name": "_sensorType",
+				"type": "string"
+			},
+			{
+				"name": "_sensorPeriod",
+				"type": "string"
+			}
+		],
+		"name": "addSensor",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "organizationBySensorId",
+		"outputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "sensorCount",
+				"type": "uint32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "organizations",
+		"outputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "sensorCount",
+				"type": "uint32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_uAddress",
+				"type": "address"
+			},
+			{
+				"name": "_role",
+				"type": "string"
+			}
+		],
+		"name": "setRole",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
 	}
 ]
 export {address, ABI}
