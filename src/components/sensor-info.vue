@@ -1,13 +1,14 @@
 <template>
   <div v-if="sensor">
     <h3>{{ sensor.name }}</h3>
-    <p>{{ sensor.type }} </p>
-    <form @submit.prevent="addSensorData" method="post">
+    <p>{{ sensor.type }} {{ sensor.period}} </p>
+    <form v-if="sensor.period == 3" @submit.prevent="addSensorData" method="post">
       <p>Add sensor data:</p>
       <p>Sensor Value: <input name="sensorValue" v-model="sensorDataForm.value"></p>
       <input type="submit" value="Add">
     </form>
     <button v-on:click="showSensorData">Show Sensor Data</button>
+        <button v-on:click="scheduleSensorData">Auto Sensor Data</button>
     <div v-if="sensorDatas.length > 0">
       <div v-for="sensorData in sensorDatas">
       {{ sensorData.dateStr }}: {{ sensorData.value}} {{ sensor.type}}
@@ -17,6 +18,7 @@
 </template>
 <script>
 import HelloMetamask from '@/components/hello-metamask'
+import scheduleSensorData from '../util/scheduleSensorData'
 export default {
   name: 'sensor-info',
   props: ['id'],
@@ -31,7 +33,6 @@ export default {
   },
   mounted () {
     console.log("my id is", this.id)
-
     this.$store.state.contractInstance().sensors(this.id,
       (err, result) => {
         if (err) {
@@ -65,6 +66,10 @@ export default {
             this.pending = false
           }
         })
+    },
+    scheduleSensorData: function(event) {
+      console.log('auto sensor data', this.sensor.id)
+      let asd = new scheduleSensorData(this.sensor.id, this.sensor.period)
     },
     showSensorData: function(event) {
       this.pending = true

@@ -72,6 +72,7 @@ export default {
       this.pending = true
       let orgId = this.$store.state.userInfo.organization.id
       console.log("think ok")
+      //this.$store.state.contractInstance().addSensor.getData()
       this.$store.state.contractInstance().addSensor(orgId, this.sensorForm.name, this.sensorForm.type, this.sensorForm.period, {
         gas: 300000,
         gasPrice: web3.toWei(1, 'gwei'),
@@ -86,6 +87,10 @@ export default {
           this.pending = false
         }
       })
+    },
+    addAutoSensorData(event) {
+      console.log('auto sensor data')
+      let asd = new autoSensorData(0)
     },
     showOrganization(event) {
       let orgId = this.orgid
