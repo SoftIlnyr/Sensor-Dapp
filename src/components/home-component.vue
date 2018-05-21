@@ -1,6 +1,15 @@
 <template>
-  <div class="sensor container"> 
+  <div class="container"> 
 
+    <form>
+      <div class="well">
+        <h4> Add Info</h4>
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="First Name">
+        </div>
+      </div>
+
+    </form>
 
     <p>Show organization: <input v-model="orgid" placeholder="Type org ID here">
     <button v-on:click="showOrganization">Submit</button>
