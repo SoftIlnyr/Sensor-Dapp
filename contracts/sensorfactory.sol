@@ -7,7 +7,7 @@ contract SensorFactory is SensorUser {
 
     mapping(uint => Organization) public organizationBySensorId;
     mapping(uint => Sensor) public sensorBySensorDataId;
-
+    
     function _createOrganization(uint _orgId, string _name) internal {
         organizations.push(Organization(_orgId, _name, 0));
     }
@@ -16,8 +16,8 @@ contract SensorFactory is SensorUser {
         _createOrganization(organizations.length, _name);
     }
     
-    function _createSensor(string _sensorType, string _sensorPeriod) internal returns (uint) {
-        Sensor memory sensor = Sensor(sensors.length, _sensorType, Period.DAILY, 0);
+    function _createSensor(string _sensorName, string _sensorType, string _sensorPeriod) internal returns (uint) {
+        Sensor memory sensor = Sensor(sensors.length, _sensorName, _sensorType, Period.DAILY, 0);
         if (keccak256(_sensorPeriod) == keccak256('DAILY')) {
             sensor.period = Period.DAILY;
         } 
@@ -30,8 +30,8 @@ contract SensorFactory is SensorUser {
         return sensors.push(sensor) - 1;
     }
     
-    function addSensor(uint _orgId, string _sensorType, string _sensorPeriod) public userOnly {
-        uint sensorId = _createSensor(_sensorType, _sensorPeriod);
+    function addSensor(uint _orgId, string _sensorName, string _sensorType, string _sensorPeriod) public userOnly {
+        uint sensorId = _createSensor(_sensorName, _sensorType, _sensorPeriod);
         organizations[_orgId].sensorCount++;
         organizationBySensorId[sensorId] = organizations[_orgId];
     }

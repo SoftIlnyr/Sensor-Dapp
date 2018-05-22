@@ -1,24 +1,54 @@
 <template>
-  <div v-if="sensor">
+  <div class="card-body" v-if="sensor">
     <h3>{{ sensor.name }}</h3>
-    <p>{{ sensor.type }} {{ sensor.period}} </p>
-    <form v-if="sensor.period == 3" @submit.prevent="addSensorData" method="post">
-      <p>Add sensor data:</p>
-      <p>Sensor Value: <input name="sensorValue" v-model="sensorDataForm.value"></p>
-      <input type="submit" value="Add">
-    </form>
-    <button v-on:click="showSensorData">Show Sensor Data</button>
-        <button v-on:click="scheduleSensorData">Auto Sensor Data</button>
-    <div v-if="sensorDatas.length > 0">
-      <div v-for="sensorData in sensorDatas">
-      {{ sensorData.dateStr }}: {{ sensorData.value}} {{ sensor.type}}
+    <p><b>Measure: </b> {{ sensor.type }} </p>
+    <p><b>Period: </b> {{ sensorTypes[sensor.period] }} </p>
+
+  <div class="my-3" v-if="sensor.period === 3">
+    <form @submit.prevent="addSensorData" method="post">
+      <div class="form-group row">
+      <label for="sensorValue" class="col-sm-2 col-form-label">Commit sensor data: </label>
+      <div class="col-sm-3">
+          <input name="sensorValue" class="form-control" v-model="sensorDataForm.value" placeholder="Sensor Value">     
       </div>
     </div>
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </div>
+
+
+<button v-if="sensorDatas.length === 0" class="btn" v-on:click="showSensorData">Show Sensor Data</button>
+<button class="btn" v-on:click="scheduleSensorData">Schedule Sensor Data</button>
+<div v-if="sensorDatas.length > 0" class="card card-outline-secondary my-4">
+<div class="card-header" >
+<h4>Sensor Data</h4> 
+ <small><a href="#" v-on:click="hideSensorData">Hide</a></small>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><a href="#" v-on:click="sortByDate">Date Time</a></th>
+        <th><a href="#" v-on:click="sortByValue">Value</a></th>
+      </tr>
+    </thead>
+  <tbody>
+      <tr v-for="sensorData in sensorDatas">
+        <td>{{ sensorData.dateStr }}</td>
+        <td>{{ sensorData.value}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+    <hr/>
 </div>
 </template>
 <script>
 import HelloMetamask from '@/components/hello-metamask'
 import scheduleSensorData from '../util/scheduleSensorData'
+const listSort = require('@/util/listSort')
 export default {
   name: 'sensor-info',
   props: ['id'],
@@ -28,7 +58,17 @@ export default {
       sensorDataForm: {
         value: null
       },
-      sensorDatas: []
+      sensorDatas: [],
+      sortSd: {
+        value: "asc",
+        date: "desc"
+      },
+      sensorTypes: {
+        0: "Daily",
+        1: "Weekly",
+        2: "Monthly",
+        3: "Single"
+      }
     }
   },
   mounted () {
@@ -74,7 +114,7 @@ export default {
     showSensorData: function(event) {
       this.pending = true
       let state = this.$store.state
-      let sensorDatas = []
+      let sensorDatas = this.sensorDatas
       console.log("show SD")
       state.contractInstance().getSensorDataBySensor(this.sensor.id, 
         (err, result) => {
@@ -104,10 +144,36 @@ export default {
                   }
                 })
             })
-          }
-        })
-      this.sensorDatas = sensorDatas
-    } 
+          sensorDatas = sensorDatas.sort(listSort.compareByDateDesc)
+        }
+      })
+
+
+    },
+    hideSensorData(event) {
+      event.preventDefault()
+      this.sensorDatas = []
+    },
+    sortByValue(event) {
+      event.preventDefault()
+      if (this.sortSd.value === "asc") {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByValueDesc)
+        this.sortSd.value = "desc"
+      } else {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByValueAsc)
+        this.sortSd.value = "asc"
+      }      
+    },
+    sortByDate(event) {
+      event.preventDefault()
+      if (this.sortSd.date === "asc") {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByDateDesc)
+        this.sortSd.date = "desc"
+      } else {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByDateAsc)
+        this.sortSd.date = "asc"
+      }  
+    }
   }
 }
 </script>

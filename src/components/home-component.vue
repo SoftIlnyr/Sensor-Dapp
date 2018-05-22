@@ -1,56 +1,75 @@
 <template>
   <div class="container"> 
-
-    <form>
-      <div class="well">
-        <h4> Add Info</h4>
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="First Name">
+    <div class="card card-outline-secondary my-5">
+      <div class="card-header">
+        <h4>Add sensor</h4>
         </div>
-      </div>
-
-    </form>
-
-    <p>Show organization: <input v-model="orgid" placeholder="Type org ID here">
-    <button v-on:click="showOrganization">Submit</button>
-    <div id="org1" class="event" v-if="organization">
-      <p>Org ID: {{ organization._id }}</p>
-      <p>Org Name: {{ organization._name }}</p>
-      <p>Org Sensor Count: {{ organization._sensorCount }}</p>
-    </div>
     <form @submit.prevent="addSensor" method="post">
-      <h3>Add sensor</h3>
-      <p>Sensor Name: <input v-model="sensorForm.name" name='sensorName' placeholder="Sensor Name"></p>
-      <p>Sensor Type: <input v-model="sensorForm.type" name='sensorType' placeholder="Sensor Type"></p>
-      <p>Sensor Period: <input v-model="sensorForm.period" name='sensorPeriod' placeholder="Sensor Period"></p>
-      <input type="submit" value="Add">
+
+      <div class="form-row">
+        <div class="form-group col-md-5">
+          <input type="text" v-model="sensorForm.name" class="form-control" placeholder="Sensor Name">
+        </div>
+        <div class="form-group col-md-3">
+          <input type="text" v-model="sensorForm.type" class="form-control" placeholder="Sensor Type">
+        </div>
+        <select class="form-control col-md-4" v-model="sensorForm.period">
+          <option v-for="option in periodOptions" v-bind:value="option.value">
+            {{ option.text }}
+          </option>
+        </select>
+        </div>
+      <button class="btn" type="submit">Add</button>
     </form>
+  </div>
 
-    <button v-on:click="showOrgSensors">Show Sensors</button>
-    <button v-on:click="hideOrgSensors">Hide Sensors</button>
+<div class="my-5">
+<button v-if="!orgSensors ||orgSensors.length === 0" class="btn" v-on:click="showOrgSensors">Show Sensors</button>
+<button v-if="!sensorDatas || sensorDatas.length === 0" class="btn" v-on:click="showOrgSensorData">Show Sensor Data</button>
+</div>
 
-    <div v-if="orgSensors && orgSensors.length > 0">
-      <h3>Датчики</h3>
-      <div v-for="sensor in orgSensors">
-        <h4>{{sensor.name}}</h4> <p>{{sensor.type}}</p>     
-      </div>
-      <sensor-info v-for="sId in orgSensors" :key="sId" v-bind:id="sId"></sensor-info>
-    </div>
+<div v-if="orgSensors && orgSensors.length > 0" class="card card-outline-secondary my-4">
+<div class="card-header" >
+<h4>Sensors</h4> 
+ <small><a href="#" v-on:click="hideOrgSensors">Hide</a></small>
+</div>
+  <sensor-info v-for="sId in orgSensors" :key="sId" v-bind:id="sId"></sensor-info> 
+</div>
 
-    <button v-on:click="showOrgSensorData">Show Sensor Data</button>
-    <div v-if="sensorDatas.length > 0">
-      <div v-for="sensorData in sensorDatas">
-      {{ sensorData.dateStr }}: {{ sensorData.value}}
-      </div>
-    </div>
+<div v-if="sensorDatas.length > 0" class="card card-outline-secondary my-4">
+<div class="card-header" >
+<h4>Sensor Data</h4> 
+ <small><a href="#" v-on:click="hideOrgSensorData">Hide</a></small>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date Time</th>
+        <th>Value</th>
+        <th>Measure</th>
+        <th>Sensor</th>
+      </tr>
+    </thead>
+  <tbody>
+      <tr v-for="sensorData in sensorDatas">
+        <td>{{ sensorData.dateStr }}</td>
+        <td>{{ sensorData.value}}</td>
+        <td>ipsum</td>
+        <td>dolor</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
 
-    <img v-if="pending" id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
       </div>
 </template>
 
 <script>
 import state from '../store/state'
 import SensorInfo from '@/components/sensor-info'
+const listSort = require('@/util/listSort')
 import {
     address,
     ABI
@@ -68,8 +87,14 @@ export default {
       sensorForm: {
         name: null,
         type: null,
-        period: null
+        period: "Sensor Period"
       },
+      periodOptions: [
+        {text: "Daily", value: "DAILY"},
+        {text: "Weekly", value: "WEEKLY"},
+        {text: "Monthly", value: "MONTHLY"},
+        {text: "Single", value: "SINGLE"}
+      ],
       orgSensors: [],
       test: "tes",
       sensorDatas: []
@@ -81,6 +106,7 @@ export default {
       this.pending = true
       let orgId = this.$store.state.userInfo.organization.id
       console.log("think ok")
+      console.log(this.sensorForm.period)
       //this.$store.state.contractInstance().addSensor.getData()
       this.$store.state.contractInstance().addSensor(orgId, this.sensorForm.name, this.sensorForm.type, this.sensorForm.period, {
         gas: 300000,
@@ -185,6 +211,9 @@ export default {
     },
     hideOrgSensors(event) {
       this.orgSensors = []
+    },
+    hideOrgSensorData(event) {
+      this.sensorDatas = []
     }
 
   },
