@@ -1,6 +1,5 @@
 <template>
-  <div id="app" class="container">
-    
+  <div id="app" >    
     <hello-metamask/>
     <router-view/>
   </div>

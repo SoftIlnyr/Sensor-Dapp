@@ -7,7 +7,7 @@
           <h3>{{ sensor.name }} </h3>
         </div>
   <div class="card-body row" v-if="sensor">
-    <div class="col-md-7">
+    <div class="col-md-4">
     <p><b>Measure: </b> {{ sensor.type }} </p>
     <p><b>Period: </b> {{ sensorTypes[sensor.period] }} </p>
 
@@ -25,22 +25,31 @@
   <button class="btn" v-on:click="scheduleSensorData">Schedule Sensor Data</button>
 </div>
 
-<div class="col-md-5">
+<div class="col-md-7">
+<button v-if="sensorDatas.length === 0" class="btn" v-on:click="showSensorData">Show Sensor Data</button>
 
-
-<button  v-if="sensorDatas.length === 0" class="btn col-md-12" v-on:click="showSensorData">Show Sensor Data</button>
-<button  v-if="sensorDatas.length > 0" class="btn col-md-12" v-on:click="hideSensorData">Hide Sensor Data</button>
-
-  <b-table v-if="sensorDatas.length > 0" small striped hover :items="sensorDatas" :fields="sensorDataFields">
-    <template slot="date" slot-scope="data">
-      {{data.item.date.toLocaleDateString() + " " + data.item.date.toLocaleTimeString()}}
-    </template>
-    <template slot="value" slot-scope="data">
-      {{data.item.value}}
-    </template>
-
-
-  </b-table>
+<div v-if="sensorDatas.length > 0" class="card card-outline-secondary my-4">
+<div class="card-header" >
+<h4>Sensor Data</h4> 
+ <small><a href="#" v-on:click="hideSensorData">Hide</a></small>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><a href="#" v-on:click="sortByDate">Date Time</a></th>
+        <th><a href="#" v-on:click="sortByValue">Value</a></th>
+      </tr>
+    </thead>
+  <tbody>
+      <tr v-for="sensorData in sensorDatas">
+        <td>{{ sensorData.dateStr }}</td>
+        <td>{{ sensorData.value}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
 </div>
       </div>
   </div>
@@ -62,32 +71,21 @@ export default {
       sensorDataForm: {
         value: null
       },
-      sensorDataFields: [
-        {
-          key: "date",
-          label: "Date",
-          sortable: true
-        },
-        {
-          key: "value",
-          label: "Value",
-          sortable: true
-        }
-      ],
       sensorDatas: [],
+      sortSd: {
+        value: "asc",
+        date: "desc"
+      },
       sensorTypes: {
         0: "Daily",
         1: "Weekly",
         2: "Monthly",
         3: "Single"
-      },
-      items: [
-  { Date: null, value: null }
-]
-
+      }
     }
   },
   mounted () {
+    console.log("my id is", this.id)
     this.$store.state.contractInstance().sensors(this.id,
       (err, result) => {
         if (err) {
@@ -130,52 +128,64 @@ export default {
       this.pending = true
       let state = this.$store.state
       let sensorDatas = this.sensorDatas
-      let sensor = this.sensor
       console.log("show SD")
-      new Promise(function(resolve, reject) {
-        state.contractInstance().getSensorDataBySensor(sensor.id,
-          (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(result)
-            }
-          })
-      }).then(result => {
-        console.log("promise 1")
-        new Promise(function(resolve, reject) {
-          let resultList = []
-          result.forEach(function(element) {
-            let sdId = element['c'][0]
-            state.contractInstance().sensorData(sdId,
-              (err, result) => {
-                if (err) {
-                  reject(err)
-                } else {
-                  let sensorData = {}
-                  sensorData.id = result[0]['c'][0]
-                  sensorData.value = result[1]['c'][0]
-                  sensorData.date = result[2]['c'][0]
-                  sensorData.date = new Date(sensorData.date * 1000)
-                  resultList.push(sensorData)
-                }
-              })
-          })
-          var int = setInterval(function() {
-            if (result.length === resultList.length) {
-              clearInterval(int)
-              resolve(resultList)
-            }
-          }, 50)
-        }).then(result => {
-          console.log("promise 2")
-          this.sensorDatas = result.sort(listSort.compareByDateDesc).slice(0, 4)
-        })
+      state.contractInstance().getSensorDataBySensor(this.sensor.id, 
+        (err, result) => {
+          if (err) {
+            console.log(err)
+            this.pending = false
+          } else {
+            result.forEach(function(element) {
+              let sdId = element['c'][0]
+              state.contractInstance().sensorData(sdId,
+                (err, result) => {
+                  if (err) {
+                    console.log(err)
+                  } else {
+                    console.log(result)
+                    let sensorData = {}
+                    sensorData.id = result[0]['c'][0]
+                    sensorData.value = result[1]['c'][0]
+                    sensorData.date = result[2]['c'][0]
+                    sensorData.date = new Date(sensorData.date * 1000)
+                    var options = {  
+                        weekday: "long", year: "numeric", month: "short",  
+                        day: "numeric", hour: "2-digit", minute: "2-digit"  
+                    };  
+                    sensorData.dateStr = sensorData.date.toLocaleDateString() + " " + sensorData.date.toLocaleTimeString()
+                    sensorDatas.push(sensorData)
+                  }
+                })
+            })
+          sensorDatas = sensorDatas.sort(listSort.compareByDateDesc)
+        }
       })
+
+
     },
     hideSensorData(event) {
       event.preventDefault()
       this.sensorDatas = []
+    },
+    sortByValue(event) {
+      event.preventDefault()
+      if (this.sortSd.value === "asc") {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByValueDesc)
+        this.sortSd.value = "desc"
+      } else {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByValueAsc)
+        this.sortSd.value = "asc"
+      }      
+    },
+    sortByDate(event) {
+      event.preventDefault()
+      if (this.sortSd.date === "asc") {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByDateDesc)
+        this.sortSd.date = "desc"
+      } else {
+        this.sensorDatas = this.sensorDatas.sort(listSort.compareByDateAsc)
+        this.sortSd.date = "asc"
+      }  
     }
   }
 }

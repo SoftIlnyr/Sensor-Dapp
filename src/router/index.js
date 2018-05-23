@@ -3,6 +3,9 @@ import Router from 'vue-router'
 import SensorDapp from '@/components/sensor-dapp'
 import UserInfo from '@/components/user-info'
 import AdminPage from '@/components/admin-page'
+import SensorComponent from '@/components/sensor-component'
+import SensorDataComponent from '@/components/sensordata-component'
+import HomeComponent from '@/components/home-component'
 
 Vue.use(Router)
 
@@ -15,5 +18,13 @@ export default new Router({
     path: '/admin',
     name: 'admin-page',
     component: AdminPage
-  }, ]
+  }, {
+  	path: '/sensors',
+  	name: 'sensor-component',
+  	component: SensorComponent
+  }, {
+  	path: '/sensor_data',
+  	name: 'sensordata-component',
+  	component: SensorDataComponent
+  }]
 })

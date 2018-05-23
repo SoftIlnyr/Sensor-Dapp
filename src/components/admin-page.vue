@@ -1,36 +1,90 @@
 <template>
   <div>
-  <div class="sensor container"> 
-     <p>Add organization: <input v-model="orgname" placeholder="Type name here">
-    <button v-on:click="addOrganization">Submit</button></p>
-
-    <form name="adduser" @submit.prevent="addUser" action="#" method="post">
-      <h2>Добавить пользователя</h2>
-      <p><input name="uaddress" v-model="userForm.address" placeholder="uaddress"></p>
-      <p><input name="firstname" v-model="userForm.firstname" placeholder="firstname"></p>
-      <p><input name="lastname" v-model="userForm.lastname" placeholder="lastname"></p>
-      <p><input name="role" v-model="userForm.role" placeholder="role"></p>
-      <input type="submit" value="Add User">
-    </form>
-
-    <form name="adduser" @submit.prevent="addOrgUser" action="#" method="post">
-      <h2>Добавить пользователя организации</h2>
-      <p><input name="uaddress" v-model="userForm.address" placeholder="uaddress"></p>
-      <p><input name="firstname" v-model="userForm.firstname" placeholder="firstname"></p>
-      <p><input name="lastname" v-model="userForm.lastname" placeholder="lastname"></p>
-      <p><input name="role" v-model="userForm.role" placeholder="role"></p>
-      <input type="submit" value="Add User">
-    </form>
-
-    <form name="adduser" @submit.prevent="addUserToOrg" action="#" method="post">
-      <h2>Привязать пользователя к организации</h2>
-      <p><input name="uaddress" v-model="userForm.address" placeholder="uaddress"></p>
-      <p><input name="firstname" v-model="userForm.orgId" placeholder="org Id"></p>
-      <input type="submit" value="Add User">
-    </form>
-    <img v-if="pending" id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
-  </p>
+<div>
+<ol class="breadcrumb">
+<li class="breadcrumb-item">
+<a href="index.html">Sensor DApp</a>
+</li>
+<li class="breadcrumb-item active">Admin</li>
+</ol>
   </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h4>Add organization</h4>
+        </div>
+        <div class="card-body">
+          <form @submit.prevent="addOrganization">
+            <div class="form-group">
+              <input class="form-control" v-model="orgname" placeholder="Org name">
+            </div>
+            <button type="submit" class="btn">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-7">
+    <div class="card mb-2">
+      <div class="card-header">
+        <h4>Add user</h4>
+      </div>
+      <div class="card-body">
+        <form @submit.prevent="createFormUser"
+              method="post">
+            <div class="form-group">
+              <input type="text"
+                     v-model="userForm.address"
+                     class="form-control"
+                     placeholder="User Address">
+            </div>
+            <div class="form-group">
+              <input type="text"
+                     v-model="userForm.firstname"
+                     class="form-control"
+                     placeholder="Firstname">
+            </div>
+            <div class="form-group">
+              <input type="text"
+                     v-model="userForm.firstname"
+                     class="form-control"
+                     placeholder="Lastname">
+            </div>
+            <select class="form-control mb-3"
+                    v-model="userForm.role">
+              <option v-for="option in roleOptions"
+                      v-bind:value="option.value">
+                {{ option.text }}
+              </option>
+            </select>
+          <button class="btn"
+                  type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h4>Bind user to organization</h4>
+      </div>
+      <div class="card-body">
+        <form name="adduser" @submit.prevent="addUserToOrg" action="#" method="post">
+          <div class="form-group">
+            <input  name="uaddress" class="form-control" v-model="userForm.address" placeholder="User Address">
+          </div>
+          <div class="form-group">
+            <input name="orgId" class="form-control" v-model="userForm.orgId" placeholder="Org Id">
+          </div>
+          <button class="btn" type="submit">Bind</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 </template>
 
@@ -50,8 +104,25 @@ export default {
       },
       organization: null,
       pending: false,
-      userInfo: null
+      userInfo: null,
+      roleOptions: [
+        {
+          text: "Admin",
+          value: "ADMIN"
+        },
+        {
+          text: "Org Admin",
+          value: "ORGADMIN"
+        },
+        {
+          text: "Org User",
+          value: "ORGUSER"
+        }
+      ]
     }
+  },
+  created() {
+    console.log("admin")
   },
   methods: {
     addOrganization(event) {
@@ -107,6 +178,15 @@ export default {
           this.pending = false
         }
       })      
+    },
+    createFormUser(e) {
+      if (this.$store.state.userInfo.role === 0) {
+        console.log("add user admin")
+        this.methods.addUser(e)
+      } else if (this.$store.state.userInfo.role === 1) {
+        console.log("add user orgadmin")
+        this.methods.addOrgUser(e)
+      }
     },
     addUserToOrg(e) {
       this.pending = true

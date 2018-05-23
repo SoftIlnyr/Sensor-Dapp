@@ -1,64 +1,63 @@
 <template>
+  <div>
 <div>
 <ol class="breadcrumb">
 <li class="breadcrumb-item">
 <a href="index.html">Sensor DApp</a>
 </li>
-<li class="breadcrumb-item active">Home</li>
+<li class="breadcrumb-item active">Sensor Data</li>
 </ol>
-  <div class="row">
-    <div class="col-lg-4">
-      <div class="card mb-3">
-        <div class="card-header">
-          <h4>Organization</h4>
-        </div>
-        <div class="card-body">
-          <p><b>Name: </b> Test</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-8">
-    <div class="card mb-3">
-      <div class="card-header">
-        <h4>Add sensor</h4>
-      </div>
-      <div class="card-body">
-        <form @submit.prevent="addSensor"
-              method="post">
-          <div class="form-row">
-            <div class="form-group col-md-5">
-              <input type="text"
-                     v-model="sensorForm.name"
-                     class="form-control"
-                     placeholder="Sensor Name">
-            </div>
-            <div class="form-group col-md-3">
-              <input type="text"
-                     v-model="sensorForm.type"
-                     class="form-control"
-                     placeholder="Sensor Type">
-            </div>
-            <select class="form-control col-md-4"
-                    v-model="sensorForm.period">
-              <option v-for="option in periodOptions"
-                      v-bind:value="option.value">
-                {{ option.text }}
-              </option>
-            </select>
-          </div>
-          <button class="btn"
-                  type="submit">Add</button>
-        </form>
-      </div>
-    </div>
   </div>
+  <div class="my-5">
+    <button v-if="!orgSensors ||orgSensors.length === 0"
+            class="btn"
+            v-on:click="showOrgSensors">Show Sensors</button>
+    <button v-if="!sensorDatas || sensorDatas.length === 0"
+            class="btn"
+            v-on:click="showOrgSensorData">Show Sensor Data</button>
+  </div>
+  <div v-if="orgSensors && orgSensors.length > 0"
+       class="card card-outline-secondary my-4">
+    <div class="card-header">
+      <h4>Sensors</h4>
+      <small><a href="#" v-on:click="hideOrgSensors">Hide</a></small>
+    </div>
+    <sensor-info v-for="sId in orgSensors"
+                 :key="sId"
+                 v-bind:id="sId"></sensor-info>
+  </div>
+  <div v-if="sensorDatas.length > 0"
+       class="card card-outline-secondary my-4">
+    <div class="card-header">
+      <h4>Sensor Data</h4>
+      <small><a href="#" v-on:click="hideOrgSensorData">Hide</a></small>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Date Time</th>
+            <th>Value</th>
+            <th>Measure</th>
+            <th>Sensor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="sensorData in sensorDatas">
+            <td>{{ sensorData.dateStr }}</td>
+            <td>{{ sensorData.value}}</td>
+            <td>ipsum</td>
+            <td>dolor</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 </template>
 <script>
 import state from '../store/state'
 import SensorInfo from '@/components/sensor-info'
-import HelloMetamask from '@/components/hello-metamask'
 const listSort = require('@/util/listSort')
 import
 {
@@ -68,14 +67,13 @@ import
 from '../util/constants/sensorContract'
 export default
 {
-  name: 'home-component',
-  created () {
-    console.log("sweet home")
-  }
+  name: "home-component",
   data()
   {
     return {
       state: this.$store.state,
+      
+: null,
       orgid: null,
       organization: null,
       pending: false,
