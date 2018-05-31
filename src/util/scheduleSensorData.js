@@ -1,6 +1,6 @@
 import state from '../store/state'
 
-function scheduleSensorData(_sensorId, _sensorPeriod) {
+function scheduleSensorData(_sensorId, _sensorPeriod, _userPK) {
   //DAILY
 	let period = 5 * 60 * 1000
   //let period = 1000
@@ -25,7 +25,7 @@ function scheduleSensorData(_sensorId, _sensorPeriod) {
     (err, nonce) => {
       console.log("nonce success")
       console.log(nonce)
-      let privateKey = new Buffer('f1e30a0b8efa5fdf1324a736df7c356e6998af924a26ae666df929abe87db257', 'hex')
+      let privateKey = new Buffer(_userPK, 'hex')
       let tx = new Tx({
         nonce: nonce,
         gasPrice: web3.toHex(web3.toWei('1', 'gwei')),

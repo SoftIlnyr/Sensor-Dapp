@@ -16,9 +16,11 @@ let pollUserInfo = function(state) {
               console.log(err)
             } else {
               let userInfo = {}
+              userInfo.address = store.state.web3.coinbase
               userInfo.firstname = result[0]
               userInfo.lastname = result[1]
               userInfo.role = result[2]["c"][0]
+              userInfo.isActive = result[3]
               resolve(userInfo)              
             }
           })

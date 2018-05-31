@@ -1,4 +1,5 @@
-const address = '0x3d0a8cd00b56d92717a9e755f3e536f9d6d70cac'
+const address = '0x80de5fe45314dfea6b2f65f0b24bc36986b69c26'
+
 const ABI = [
 	{
 		"constant": true,
@@ -99,6 +100,25 @@ const ABI = [
 		"type": "function"
 	},
 	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "userAddresses",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"constant": false,
 		"inputs": [
 			{
@@ -114,6 +134,20 @@ const ABI = [
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getOrganizationCount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -313,17 +347,12 @@ const ABI = [
 	},
 	{
 		"constant": true,
-		"inputs": [
-			{
-				"name": "_orgId",
-				"type": "uint256"
-			}
-		],
-		"name": "getSensorDataByOrganization",
+		"inputs": [],
+		"name": "getUserCount",
 		"outputs": [
 			{
 				"name": "",
-				"type": "uint256[]"
+				"type": "uint256"
 			}
 		],
 		"payable": false,

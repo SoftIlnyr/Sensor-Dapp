@@ -1,57 +1,95 @@
 <template>
   <div>
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card mb-3">
-        <div class="card-header">
-          <h3>{{ sensor.name }} </h3>
-        </div>
-  <div class="card-body row" v-if="sensor">
-    <div class="col-md-7">
-    <p><b>Measure: </b> {{ sensor.type }} </p>
-    <p><b>Period: </b> {{ sensorTypes[sensor.period] }} </p>
-
-  <div class="my-3">
-    <form @submit.prevent="addSensorData" method="post">
-      <div class="form-group row">
-      <label for="sensorValue" class="col-sm-4 col-form-label">Commit sensor data: </label>
-      <div class="col-md-8">
-          <input name="sensorValue" class="form-control" v-model="sensorDataForm.value" placeholder="Sensor Value">     
-      </div>
+    <hello-metamask/>
+    <div>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <router-link to="/">Sensor DApp</router-link>
+        </li>
+        <li class="breadcrumb-item active"><router-link to="/sensors">Sensors</router-link></li>
+        <li v-if="sensor" class="breadcrumb-item active">{{ sensor.name }}</li>
+      </ol>
     </div>
-      <button class="btn" type="submit">Add</button>
-    </form>
+    <b-row v-if="sensor">
+      <b-col md="5">
+        <b-card class="mb-3" header-tag="header">
+          <h4 slot="header" class="mb-0">{{sensor.name}}</h4>
+          <b-card-body>
+            <p><b>Measure: </b> {{ sensor.type }} </p>
+            <p><b>Period: </b> {{ sensorTypes[sensor.period] }} </p>
+          </b-card-body>
+        </b-card>
+      </b-col>
+      <b-col md="7">
+        <b-card v-if="sensor.period !== 3" class="mb-3" header-tag="header">
+          <h4 slot="header" class="mb-0">Schedule</h4>
+          <b-card-body>
+            <b-form @submit="scheduleSensorData">
+              <b-form-group horizontal label="User Private Key">
+                <b-form-input v-model="sensorDataForm.userPK" placeholder="Private Key">
+
+                </b-form-input>
+              </b-form-group>
+              <b-button type="submit">Schedule</b-button>
+            </b-form>
+          </b-card-body>
+        </b-card>
+        <b-card v-if="sensor.period === 3" class="mb-3" header-tag="header">
+          <h4 slot="header" class="mb-0">Commit Data</h4>
+          <b-card-body>
+            <b-form @submit="commitSensorData">
+              <b-form-group horizontal label="Value" >
+                <b-form-input v-model="sensorDataForm.value" placeholder="Value">
+
+                </b-form-input>
+              </b-form-group>
+              <b-button type="submit">Commit</b-button>
+            </b-form>
+          </b-card-body>
+        </b-card>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col md="12">
+        <b-card class="my-1"
+        header-tag="header">
+          <h4 slot="header" class="my-1">Sensor Data</h4>
+          <b-card-body>
+            <b-row>
+              <b-col md="6" class="my-2">
+                <b-form-group horizontal label="Per page" class="mb-0">
+                  <b-form-select :options="sensorDataTable.pageOptions" v-model="sensorDataTable.perPage" />
+                </b-form-group>
+              </b-col>
+              <b-col md="6" class="my-2">
+                <b-pagination :total-rows="sensorDataTable.totalRows" :per-page="sensorDataTable.perPage" v-model="sensorDataTable.currentPage" class="my-0" />
+              </b-col>
+            </b-row>
+            <b-table v-if="sensorData.length > 0" 
+              striped 
+              hover
+              :items="sensorData"
+              :fields="sensorDataTable.fields"
+              :current-page="sensorDataTable.currentPage"
+              :per-page="sensorDataTable.perPage">
+              <template slot="date" slot-scope="data">
+              {{data.item.date.toLocaleDateString() + " " + data.item.date.toLocaleTimeString()}}
+              </template>
+              <template slot="value" slot-scope="data">
+              {{data.item.value}}
+              </template>
+            </b-table>
+          </b-card-body>
+        </b-card>
+      </b-col>
+    </b-row>  
   </div>
-  <button class="btn" v-on:click="scheduleSensorData">Schedule Sensor Data</button>
-</div>
-
-<div class="col-md-5">
-
-
-<button  v-if="sensorDatas.length === 0" class="btn col-md-12" v-on:click="showSensorData">Show Sensor Data</button>
-<button  v-if="sensorDatas.length > 0" class="btn col-md-12" v-on:click="hideSensorData">Hide Sensor Data</button>
-
-  <b-table v-if="sensorDatas.length > 0" small striped hover :items="sensorDatas" :fields="sensorDataFields">
-    <template slot="date" slot-scope="data">
-      {{data.item.date.toLocaleDateString() + " " + data.item.date.toLocaleTimeString()}}
-    </template>
-    <template slot="value" slot-scope="data">
-      {{data.item.value}}
-    </template>
-
-
-  </b-table>
-</div>
-      </div>
-  </div>
-  </div>
-</div>
-</div>
-</div>
 </template>
+
 <script>
 import HelloMetamask from '@/components/hello-metamask'
 import scheduleSensorData from '../util/scheduleSensorData'
+const contractUtils = require('@/util/contractUtils')
 const listSort = require('@/util/listSort')
 export default {
   name: 'sensor-info',
@@ -59,124 +97,88 @@ export default {
   data () {
     return {
       sensor: null,
+      sensorData: [],
       sensorDataForm: {
-        value: null
+        value: null,
+        userPK: null
       },
-      sensorDataFields: [
-        {
-          key: "date",
-          label: "Date",
-          sortable: true
-        },
-        {
-          key: "value",
-          label: "Value",
-          sortable: true
-        }
-      ],
-      sensorDatas: [],
       sensorTypes: {
         0: "Daily",
         1: "Weekly",
         2: "Monthly",
         3: "Single"
       },
-      items: [
-  { Date: null, value: null }
-]
-
+      sensorDataTable: {
+        fields: [
+          {
+            key: "date",
+            label: "Date",
+            sortable: true
+          },
+          {
+            key: "value",
+            label: "Value",
+            sortable: true
+          }
+        ],
+        currentPage: 1,
+        perPage: 10,
+        pageOptions: [10, 20, 50],
+        totalRows: 0
+      }
     }
   },
-  mounted () {
-    this.$store.state.contractInstance().sensors(this.id,
-      (err, result) => {
-        if (err) {
-          console.log('get sensor err: ', err)
-        } else {
-          this.sensor = {}
-          this.sensor.id = result[0]['c'][0]
-          this.sensor.name = result[1]
-          this.sensor.type = result[2]
-          this.sensor.period = result[3]['c'][0]
-          console.log(this.sensor)
-        }
+  watch: {
+    sensorData: {
+      handler: function(val, oldVal) {
+        this.sensorDataTable.totalRows = this.sensorData.length
+      }
+    }
+  },  
+  created () {
+    let sId = this.$route.params.sensorId
+    contractUtils.getSensorInfo(sId).then(result => {
+      this.sensor = result
+    })
+    this.showSensorData()
+  },
+  methods: {
+    commitSensorData: function(event) {
+      contractUtils.commitSensorData(this.sensor.id, this.sensorDataForm.value).then(result => {
+        console.log(result)
       })
     },
-  methods: {
-    addSensorData: function(e) {
-      console.log(this.$store.state.contractInstance())
-      this.pending = true
-      this.$store.state.contractInstance().addSensorData(this.sensor.id, this.sensorDataForm.value, {
-        gas: 300000,
-        gwei: 1,
-        value: 0,
-        from: this.$store.state.web3.coinbase
-      },
-        (err, result) => {
-          if (err) {
-            console.log(err)
-            this.pending = false
-          } else {
-            console.log("sensor data added")
-            this.pending = false
-          }
-        })
-    },
     scheduleSensorData: function(event) {
-      console.log('auto sensor data', this.sensor.id)
-      let asd = new scheduleSensorData(this.sensor.id, this.sensor.period)
+      console.log("Schedule")
+      let sSD = new scheduleSensorData(this.sensor.id, this.sensor.period, this.sensorDataForm.userPK)
     },
-    showSensorData: function(event) {
-      this.pending = true
+    showSensorData: function(e) {
       let state = this.$store.state
-      let sensorDatas = this.sensorDatas
-      let sensor = this.sensor
-      console.log("show SD")
-      new Promise(function(resolve, reject) {
-        state.contractInstance().getSensorDataBySensor(sensor.id,
-          (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(result)
-            }
-          })
-      }).then(result => {
-        console.log("promise 1")
+      let sId = this.$route.params.sensorId
+      contractUtils.getSensorDataBySensor(sId).then(result => {        
         new Promise(function(resolve, reject) {
           let resultList = []
           result.forEach(function(element) {
-            let sdId = element['c'][0]
-            state.contractInstance().sensorData(sdId,
-              (err, result) => {
-                if (err) {
-                  reject(err)
-                } else {
-                  let sensorData = {}
-                  sensorData.id = result[0]['c'][0]
-                  sensorData.value = result[1]['c'][0]
-                  sensorData.date = result[2]['c'][0]
-                  sensorData.date = new Date(sensorData.date * 1000)
-                  resultList.push(sensorData)
-                }
-              })
+            contractUtils.getSensorDataInfo(element).then(result => {
+              resultList.push(result)
+            })
           })
-          var int = setInterval(function() {
-            if (result.length === resultList.length) {
+          let int = setInterval(function() {
+            if (resultList.length === result.length) {
               clearInterval(int)
               resolve(resultList)
             }
           }, 50)
         }).then(result => {
-          console.log("promise 2")
-          this.sensorDatas = result.sort(listSort.compareByDateDesc).slice(0, 4)
+          console.log(result)
+          this.sensorData = result.sort(listSort.compareByDateDesc)
         })
       })
+
     },
-    hideSensorData(event) {
-      event.preventDefault()
-      this.sensorDatas = []
-    }
+  },
+  components: {
+    'hello-metamask': HelloMetamask
   }
 }
 </script>

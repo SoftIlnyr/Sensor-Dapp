@@ -28,4 +28,5 @@ contract SensorStruct {
     Organization[] public organizations;
     Sensor[] public sensors;
     SensorData[] public sensorData;
+
 }

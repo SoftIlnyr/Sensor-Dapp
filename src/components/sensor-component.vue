@@ -1,9 +1,10 @@
 <template>
   <div>
+    <hello-metamask/>
 <div>
 <ol class="breadcrumb">
 <li class="breadcrumb-item">
-<a href="index.html">Sensor DApp</a>
+<router-link to="/">Sensor DApp</router-link>
 </li>
 <li class="breadcrumb-item active">Sensors</li>
 </ol>
@@ -45,40 +46,62 @@
     </div>
   </div>
   </div>
-<div class="mb-0 mt-2">
-            <h3>Sensors</h3></div>
-<hr class="mt-1">
-  <div v-if="orgSensors && orgSensors.length > 0">
-    <sensor-info v-for="sId in orgSensors"
-                 :key="sId"
-                 v-bind:id="sId"></sensor-info>
-  </div>
-  <div v-if="sensorDatas.length > 0"
-       class="card card-outline-secondary my-4">
-    <div class="card-header">
-      <h4>Sensor Data</h4>
-      <small><a href="#" v-on:click="hideOrgSensorData">Hide</a></small>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Date Time</th>
-            <th>Value</th>
-            <th>Measure</th>
-            <th>Sensor</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="sensorData in sensorDatas">
-            <td>{{ sensorData.dateStr }}</td>
-            <td>{{ sensorData.value}}</td>
-            <td>ipsum</td>
-            <td>dolor</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+
+  <b-row>
+    <b-col md="12">
+      <b-card class="mb-3" 
+        header-tag="header">
+        <h4 slot="header" class="mb-0">Sensors</h4>
+        <b-card-body>
+            <b-row>
+              <b-col md="6" class="my-2">
+                <b-form-group horizontal label="Per page" class="mb-0">
+                  <b-form-select :options="pageOptions" v-model="perPage" />
+                </b-form-group>
+              </b-col>
+              <b-col md="6" class="my-2">
+                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" class="my-0" />
+              </b-col>
+            </b-row>
+          <b-table striped 
+            hover 
+            :items="sensors" 
+            :fields="sensorFields"
+            :per-page="perPage"
+            :current-page="currentPage">
+            <template slot="name" slot-scope="row" sortable>{{ row.item.name }}</template>
+            <template slot="type" slot-scope="row">{{ row.item.type }}</template>
+            <template slot="period" slot-scope="row">{{ periodOptions[row.item.period].text }}</template>
+            <template slot="actions" slot-scope="row">
+              <b-button size="sm" @click.stop="toggleSensorData(row.item); row.toggleDetails();" class="mr-2">
+               {{ row.detailsShowing ? 'Hide' : 'Show'}} Details
+              </b-button>
+              <router-link :to="{ name: 'sensor-info', params: { sensorId: row.item.id }}" >
+                <b-button size="sm" >
+                More Info
+              </b-button></router-link>
+            </template>
+            <template slot="row-details" slot-scope="row">
+              <b-card>
+                <b-row>
+                  <b-col md="6"></b-col>
+                  <b-col md="6">
+                    <b-table striped small
+                      :items="row.item.sensorData"
+                      :fields="sensorDataFields">
+                      <template slot="date" slot-scope="sdRow">{{ sdRow.item.date.toLocaleDateString() + " " + sdRow.item.date.toLocaleTimeString() }}</template>
+
+                    </b-table>
+                  </b-col>
+                </b-row>
+              </b-card>
+            </template>
+          </b-table>
+        </b-card-body>
+      </b-card>
+    </b-col>
+  </b-row>
+
   </div>
 </div>
 </template>
@@ -86,17 +109,20 @@
 import state from '../store/state'
 import SensorInfo from '@/components/sensor-info'
 import HelloMetamask from '@/components/hello-metamask'
-const listSort = require('@/util/listSort')
 import
 {
   address,
   ABI
 }
 from '../util/constants/sensorContract'
+
+const listSort = require('@/util/listSort')
+const contractUtils = require('@/util/contractUtils')
+
 export default
 {
   name: "sensor-component",
-  mounted () {
+  created () {
     console.log("sensor alive")
     this.showOrgSensors()
   },
@@ -104,66 +130,73 @@ export default
   {
     return {
       state: this.$store.state,
+      userInfo: this.$store.state.userInfo,
       orgid: null,
       organization: null,
       pending: false,
+      periodOptions: contractUtils.periodOptions,
       sensorForm:
       {
-        name: null,
-        type: null,
-        period: "Sensor Period"
+        name: "",
+        type: "",
+        period: ""
       },
-      periodOptions: [
-      {
-        text: "Daily",
-        value: "DAILY"
+      sensors: [],
+      sensorFields: [
+        {
+          key: "name",
+          label: "Name",
+          sortable: true,
+          sortDirection: "Asc"
+        },
+        {
+          key: "type",
+          label: "Measure"
+        },
+        {
+          key: "period",
+          label: "Period"
+        },
+        {
+          key: "actions",
+          label: "Actions"
+        }
+      ],
+      sensorDataFields: [
+        {
+          key: "date",
+          label: "Date"
+        },
+        {
+          key: "value",
+          label: "Value",
+          sortable: true
+        }
+      ],
+      perPage: 5,
+      pageOptions: [5, 10, 20],
+      currentPage: 1,
+      totalRows: 0
+    }
+  },
+  watch: {
+    sensors:  {
+      handler: function (val, oldVal) {
+        this.totalRows = this.sensors.length      
       },
-      {
-        text: "Weekly",
-        value: "WEEKLY"
-      },
-      {
-        text: "Monthly",
-        value: "MONTHLY"
-      },
-      {
-        text: "Single",
-        value: "SINGLE"
-      }],
-      orgSensors: [],
-      sensorDatas: []
+      deep: true
     }
   },
   methods:
   {
     addSensor: function(e)
     {
-      //e.preventDefault()
-      this.pending = true
       let orgId = this.$store.state.userInfo.organization.id
-      console.log("think ok")
-      console.log(this.sensorForm.period)
-      //this.$store.state.contractInstance().addSensor.getData()
-      this.$store.state.contractInstance().addSensor(orgId, this.sensorForm.name, this.sensorForm.type, this.sensorForm.period,
-      {
-        gas: 300000,
-        gasPrice: web3.toWei(1, 'gwei'),
-        value: 0,
-        from: this.$store.state.web3.coinbase
-      }, (err, result) =>
-      {
-        if (err)
-        {
-          console.log(err)
-          this.pending = false
-        }
-        else
-        {
-          console.log("Sensor added")
-          this.pending = false
-        }
+      contractUtils.addSensor(orgId, this.sensorForm.name, this.sensorForm.type, this.sensorForm.period).then(result => {
+          console.log(result)
       })
     },
+
     addAutoSensorData(event)
     {
       console.log('auto sensor data')
@@ -171,96 +204,55 @@ export default
     },
     showOrgSensors: function(event)
     {
-      let state = this.$store.state
-      let orgId = state.userInfo.organization.id
-      let orgSensors = []
+      let orgId = this.$store.state.userInfo.organization.id
+      
       console.log("getting by orgId: ", orgId)
-      state.contractInstance().getSensorsByOrganization(orgId,
-        (err, result) =>
-        {
-          if (err)
-          {
-            console.log(err)
-          }
-          else
-          {
-            //orgSensors = this.orgSensors
-            console.log("got them!")
-            console.log(result)
-            result.forEach(function(element)
-            {
-              let sId = element['c'][0]
-              console.log(sId)
-              orgSensors.push(sId)
+      contractUtils.getSensorsByOrganization(orgId).then(result => {
+        new Promise(function(resolve, reject) {
+          let resultList = []
+          result.forEach(function(element) {
+            contractUtils.getSensorInfo(element).then(result => {
+              resultList.push(result)
             })
-            //this.orgSensors = result
-          }
+          })
+          let int = setInterval(function() {
+            if (resultList.length === result.length) {
+              clearInterval(int)
+              resolve(resultList)
+            }
+          })
+        }).then(result => {
+          this.sensors = result.sort(listSort.compareByNameAsc)
         })
-      this.orgSensors = orgSensors
+      })
     },
-    showOrgSensorData(event)
-    {
+    toggleSensorData: function(sensor) {
       let state = this.$store.state
-      let orgId = state.userInfo.organization.id
-      let sensorDatas = []
-      console.log("show org SD")
-      state.contractInstance().getSensorDataByOrganization(orgId,
-        (err, result) =>
-        {
-          if (err)
-          {
-            console.log(err)
-          }
-          else
-          {
-            result.forEach(function(element)
-            {
-              let sdId = element['c'][0]
-              state.contractInstance().sensorData(sdId,
-                (err, result) =>
-                {
-                  if (err)
-                  {
-                    console.log(err)
-                  }
-                  else
-                  {
-                    console.log(result)
-                    let sensorData = {}
-                    sensorData.id = result[0]['c'][0]
-                    sensorData.value = result[1]['c'][0]
-                    sensorData.date = result[2]['c'][0]
-                    sensorData.date = new Date(sensorData.date * 1000)
-                    var options = {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    };
-                    sensorData.dateStr = sensorData.date.toLocaleDateString() + " " + sensorData.date.toLocaleTimeString()
-                    sensorDatas.push(sensorData)
-                  }
-                })
+      contractUtils.getSensorDataBySensor(sensor.id).then(result => {        
+        new Promise(function(resolve, reject) {
+          let resultList = []
+          result.forEach(function(element) {
+            contractUtils.getSensorDataInfo(element).then(result => {
+              resultList.push(result)
             })
-          }
+          })
+          let int = setInterval(function() {
+            if (resultList.length === result.length) {
+              clearInterval(int)
+              resolve(resultList)
+            }
+          }, 50)
+        }).then(result => {
+          console.log(result)
+          sensor.sensorData = result.sort(listSort.compareByDateDesc).slice(0, 5)
         })
-      this.sensorDatas = sensorDatas
-    },
-    hideOrgSensors(event)
-    {
-      this.orgSensors = []
-    },
-    hideOrgSensorData(event)
-    {
-      this.sensorDatas = []
+      })
     }
-
   },
   components:
   {
-    'sensor-info': SensorInfo
+    'sensor-info': SensorInfo,
+    'hello-metamask': HelloMetamask
   }
 }
 

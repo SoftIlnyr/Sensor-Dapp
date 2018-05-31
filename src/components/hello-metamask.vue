@@ -7,7 +7,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarResponsive">
       <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
-        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+        <li v-if="userInfo.isActive && (userInfo.role === 0 || userInfo.role === 1)" class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
           <router-link to="/admin" class="nav-link" href="#">
             <i class="fa fa-fw fa-dashboard"></i>
             <span class="nav-link-text">Admin</span>

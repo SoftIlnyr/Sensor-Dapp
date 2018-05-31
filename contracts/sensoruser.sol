@@ -13,6 +13,7 @@ contract SensorUser is SensorStruct, Ownable{
         bool isActive;
     }
     
+    address[] userAddresses;
     mapping(address => User) public users;
     mapping(address => Organization) public organizationByUserAddress;
     
@@ -45,6 +46,7 @@ contract SensorUser is SensorStruct, Ownable{
             user.role = Role.ORGADMIN;
         } 
         users[_uAddress] = user;
+        userAddresses.push(_uAddress);
     }
     
     function createOrgUser(address _uAddress, string _firstName, string _lastName, string _role) external orgAdminOnly {
@@ -53,6 +55,7 @@ contract SensorUser is SensorStruct, Ownable{
             user.role = Role.ORGADMIN;
         } 
         users[_uAddress] = user;
+        userAddresses.push(_uAddress);
         organizationByUserAddress[_uAddress] = organizationByUserAddress[msg.sender];
     }
     

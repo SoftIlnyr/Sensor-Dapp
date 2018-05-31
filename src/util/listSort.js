@@ -13,3 +13,11 @@ export function compareByValueAsc(a, b) {
 export function compareByValueDesc(a, b) {
   return b.value - a.value
 }
+
+export function compareByNameAsc(a, b) {
+	if (a.name < b.name) {
+		return -1
+	} else {
+		return 1
+	}
+}

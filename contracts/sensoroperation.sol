@@ -3,7 +3,6 @@ import "./sensorfactory.sol";
 //pragma experimental ABIEncoderV2;
 
 contract SensorOperation is SensorFactory {
-
     function getSensorsByOrganization(uint _orgId) public view returns(uint[]) {
         Organization storage organization = organizations[_orgId];
         uint[] memory result = new uint[](organization.sensorCount);
@@ -29,22 +28,12 @@ contract SensorOperation is SensorFactory {
         }
         return result;
     }
+
+    function getOrganizationCount() public view returns (uint) {
+        return organizations.length;
+    }
     
-    function getSensorDataByOrganization(uint _orgId) public view returns(uint[]) {
-        uint[] memory sensorId = getSensorsByOrganization(_orgId);
-        uint sensorDataCount = 0;
-        for (uint i = 0; i < sensorId.length; i++) {
-            sensorDataCount += sensors[sensorId[i]].sensorDataCount;
-        }
-        uint[] memory result = new uint[](sensorDataCount);
-        uint index = 0;
-        for (i = 0; i < sensorId.length; i++) {
-            uint[] memory sDataId = getSensorDataBySensor(sensorId[i]);
-            for (uint j = 0; j < sDataId.length; j++) {
-                result[index] = sDataId[j];
-                index++;
-            }
-        }
-        return result;
+    function getUserCount() public view returns (uint) {
+        return userAddresses.length;
     }
 }

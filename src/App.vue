@@ -1,6 +1,6 @@
 <template>
   <div id="app" >    
-    <hello-metamask/>
+    <!--<hello-metamask/>-->
     <router-view/>
   </div>
 </template>

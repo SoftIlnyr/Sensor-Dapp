@@ -27,6 +27,9 @@ contract SensorFactory is SensorUser {
         if (keccak256(_sensorPeriod) == keccak256('MONTHLY')) {
             sensor.period = Period.MONTHLY;
         }
+        if (keccak256(_sensorPeriod) == keccak256('SINGLE')) {
+            sensor.period = Period.SINGLE;
+        }
         return sensors.push(sensor) - 1;
     }
     
@@ -37,7 +40,7 @@ contract SensorFactory is SensorUser {
     }
     
     function _createSensorData(uint _value) internal returns (uint) {
-        SensorData memory sData = SensorData(sensors.length, _value, uint32(now));
+        SensorData memory sData = SensorData(sensorData.length, _value, uint32(now));
         return sensorData.push(sData) - 1;
     }
     
